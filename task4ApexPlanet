@@ -1,0 +1,157 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Full Project Implementation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f9f9f9; }
+    nav { display: flex; justify-content: center; background: #333; }
+    nav button { flex: 1; padding: 15px; background: #444; color: white; border: none; cursor: pointer; }
+    nav button.active { background: #00b894; }
+    .tab-content { display: none; padding: 20px; }
+    .tab-content.active { display: block; }
+
+    /* Portfolio Styles */
+    .portfolio section { margin-bottom: 20px; }
+    .portfolio h2 { color: #00b894; }
+
+    /* To-Do Styles */
+    .todo input, .todo button { padding: 10px; margin: 5px; }
+    .todo ul { list-style: none; padding: 0; }
+    .todo li { background: #dfe6e9; padding: 10px; margin: 5px 0; border-radius: 5px; }
+
+    /* Product Styles */
+    .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .product { background: #ffeaa7; padding: 15px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <button onclick="showTab('portfolio')" class="active">Portfolio</button>
+  <button onclick="showTab('todo')">To-Do App</button>
+  <button onclick="showTab('products')">Products</button>
+</nav>
+
+<!-- Portfolio Section -->
+<div id="portfolio" class="tab-content active portfolio">
+  <section>
+    <h2>About Me</h2>
+    <p>I am a web developer with a passion for creating interactive web apps.</p>
+  </section>
+  <section>
+    <h2>Projects</h2>
+    <ul>
+      <li>Portfolio Website</li>
+      <li>To-Do List App</li>
+      <li>Product Listing Page</li>
+    </ul>
+  </section>
+  <section>
+    <h2>Contact</h2>
+    <p>Email: Tanujavankala76@gmail.com</p>
+  </section>
+</div>
+
+<!-- To-Do App Section -->
+<div id="todo" class="tab-content todo">
+  <h2>Note/To-Do App</h2>
+  <input type="text" id="taskInput" placeholder="Add task..." />
+  <button onclick="addTask()">Add</button>
+  <ul id="taskList"></ul>
+</div>
+
+<!-- Products Section -->
+<div id="products" class="tab-content">
+  <h2>Product Listing</h2>
+  <select id="categoryFilter" onchange="filterProducts()">
+    <option value="all">All</option>
+    <option value="tech">Tech</option>
+    <option value="fashion">Fashion</option>
+  </select>
+  <select id="sortBy" onchange="sortProducts()">
+    <option value="name">Sort by Name</option>
+    <option value="price">Sort by Price</option>
+  </select>
+  <div class="products" id="productContainer"></div>
+</div>
+
+<script>
+  // Tab navigation
+  function showTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // To-Do Logic with localStorage
+  const taskInput = document.getElementById('taskInput');
+  const taskList = document.getElementById('taskList');
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+  function addTask() {
+    if (!taskInput.value.trim()) return;
+    tasks.push(taskInput.value);
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    taskInput.value = '';
+    renderTasks();
+  }
+
+  function renderTasks() {
+    taskList.innerHTML = '';
+    tasks.forEach((task, index) => {
+      const li = document.createElement('li');
+      li.innerText = task;
+      li.onclick = () => {
+        tasks.splice(index, 1);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        renderTasks();
+      };
+      taskList.appendChild(li);
+    });
+  }
+
+  renderTasks();
+
+  // Product Listing
+  const products = [
+    { name: 'Laptop', category: 'tech', price: 1200 },
+    { name: 'Smartwatch', category: 'tech', price: 200 },
+    { name: 'Jeans', category: 'fashion', price: 50 },
+    { name: 'T-shirt', category: 'fashion', price: 20 }
+  ];
+
+  function displayProducts(data) {
+    const container = document.getElementById('productContainer');
+    container.innerHTML = '';
+    data.forEach(p => {
+      container.innerHTML += `
+        <div class="product">
+          <h3>${p.name}</h3>
+          <p>Category: ${p.category}</p>
+          <p>Price: $${p.price}</p>
+        </div>`;
+    });
+  }
+
+  function filterProducts() {
+    const category = document.getElementById('categoryFilter').value;
+    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+    displayProducts(filtered);
+  }
+
+  function sortProducts() {
+    const sortBy = document.getElementById('sortBy').value;
+    const sorted = [...products].sort((a, b) => {
+      return sortBy === 'name' ? a.name.localeCompare(b.name) : a.price - b.price;
+    });
+    displayProducts(sorted);
+  }
+
+  displayProducts(products);
+</script>
+
+</body>
+</html>
